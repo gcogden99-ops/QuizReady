@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UPCI SBQ 2026 - Ready. Always.</title>
+    <style>
+        :root {
+            --primary: #2E3A85; /* Deep Royal Blue */
+            --bg: #F4F4F9;
+            --white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-light: #f0f0f0;
+            --accent-green: #28a745;
+            --accent-red: #dc3545;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radius: 20px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            background-color: var(--bg);
+            color: var(--text-dark);
+            height: 100vh;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 800;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- Screens --- */
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        .screen.active {
+            transform: translateX(0);
+        }
+
+        /* --- Setup Screen Layout --- */
+        #setup-screen {
+            overflow: hidden; 
+        }
+        
+        /* Flex row for top controls */
+        .top-controls {
+            flex-shrink: 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .grid-container {
+            flex: 1; 
+            background: white;
+            border-radius: var(--radius);
+            padding: 15px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        .grid-scroll-area {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 5px;
+        }
+
+        .bottom-controls {
+            flex-shrink: 0;
+            background: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(46, 58, 133, 0.3);
+        }
+
+        .btn-text {
+            background: transparent;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 5px 10px;
+        }
+
+        /* Toggle Buttons for Setup */
+        .btn-div-toggle {
+            flex: 1;
+            background: var(--primary);
+            color: white;
+            font-size: 0.9rem;
+            padding: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-order-toggle {
+            flex: 1;
+            background: white;
+            border: 2px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 10px; /* Account for border */
+        }
+        
+        .btn-order-toggle.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(46, 58, 133, 0.05);
+        }
+
+        /* --- Grid & Chips --- */
+        .section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+            gap: 8px;
+        }
+
+        .section-chip {
+            background: #f0f0f5;
+            color: #666;
+            padding: 10px 0;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .section-chip.selected {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 5px rgba(46, 58, 133, 0.3);
+        }
+
+        /* --- Range Slider --- */
+        .range-container {
+            margin-bottom: 5px;
+        }
+        .range-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--primary);
+            height: 6px;
+            background: #eee;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        /* --- Quiz Screen --- */
+        #quiz-screen {
+            justify-content: flex-start;
+            align-items: center;
+            overflow-y: auto; 
+            padding-top: 20px;
+        }
+
+        .quiz-stats-header {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px 15px 10px;
+            color: #555;
+            font-size: 0.85rem; /* Slightly smaller to fit time */
+            font-weight: 600;
+        }
+
+        .quiz-stat-box b {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .flashcard {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            min-height: 50vh;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: transform 0.15s;
+            margin-bottom: 20px;
+            border: 1px solid #f0f0f0;
+            flex-grow: 1; /* Allow it to fill space if needed */
+        }
+
+        .flashcard:active {
+            transform: scale(0.98);
+        }
+
+        .fc-label {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .fc-content {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .fc-sub {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .quiz-controls {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 10px;
+        }
+
+        .btn-quiz {
+            flex: 1;
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-incorrect { background-color: var(--accent-red); }
+        .btn-correct { background-color: var(--accent-green); }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 6px;
+            background: var(--primary);
+            transition: width 0.3s;
+            z-index: 20;
+        }
+
+        .header-progress {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+
+        /* --- Stats Screen --- */
+        #stats-screen {
+            overflow: hidden; /* Container fixed */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px 10px; /* Reduced padding for 3-up view */
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-big {
+            font-size: 1.8rem; /* Smaller font for 3-up view */
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+            margin-top: 5px;
+        }
+        
+        /* Stats scroll container */
+        .stats-content {
+            flex: 1;
+            /* Scroll hidden here, flex column to distribute space */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-bottom: 20px;
+            padding-right: 5px;
+        }
+
+        .missed-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            /* List handles its own scrolling now */
+            overflow-y: auto;
+            flex: 1; 
+        }
+
+        .missed-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer; 
+        }
+        
+        .missed-item:last-child { border-bottom: none; }
+
+        .missed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .missed-ref {
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .expand-icon {
+            font-size: 0.8rem;
+            color: #ccc;
+            transition: transform 0.2s;
+        }
+
+        .missed-text {
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 1; 
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .missed-item.expanded .missed-text {
+            -webkit-line-clamp: unset;
+            display: block;
+            color: #000;
+        }
+
+        .missed-item.expanded .expand-icon {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        /* Helper */
+        .hidden { display: none !important; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc; 
+            border-radius: 3px;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Ready. Always.</h1>
+    <div id="header-subtitle" class="header-progress hidden">UPCI Senior Bible Quizzing 2026</div>
+</header>
+
+<main>
+    <!-- SETUP SCREEN -->
+    <div id="setup-screen" class="screen active">
+        
+        <!-- Top Controls: Division & Order -->
+        <div class="top-controls">
+            <button class="btn btn-div-toggle" id="btn-division">Intermediate</button>
+            <button class="btn btn-order-toggle active" id="btn-mixed">Mixed Order</button>
+        </div>
+
+        <!-- Middle: Scrollable Grid -->
+        <div class="grid-container">
+            <div class="grid-header">
+                <h3 style="margin:0; font-size:1.1rem;">Select Sections</h3>
+                <button class="btn btn-text" id="btn-reset">Reset</button>
+            </div>
+            <div class="grid-scroll-area">
+                <div id="section-grid" class="section-grid">
+                    <!-- Chips generated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom: Settings & Start -->
+        <div class="bottom-controls">
+            <div class="range-container">
+                <div class="range-header">
+                    <span>Verse Count</span>
+                    <span id="limit-display" style="color:var(--primary); font-weight:800;">All</span>
+                </div>
+                <input type="range" id="limit-slider" min="1" max="100" value="100">
+            </div>
+            
+            <button class="btn btn-primary" id="start-btn" style="margin-top: 10px;">START STUDYING</button>
+        </div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="screen">
+        <div class="progress-bar" id="quiz-progress"></div>
+        
+        <div class="quiz-stats-header">
+            <span class="quiz-stat-box">Time: <b id="stat-live-time">00:00</b></span>
+            <span class="quiz-stat-box">Correct: <b id="stat-live-correct" style="color: var(--accent-green)">0</b></span>
+            <span class="quiz-stat-box">Incorrect: <b id="stat-live-incorrect" style="color: var(--accent-red)">0</b></span>
+            <span class="quiz-stat-box">Left: <b id="stat-live-left">0</b></span>
+        </div>
+
+        <div class="flashcard" id="flashcard">
+            <div class="fc-label" id="fc-label">Reference</div>
+            <div class="fc-content" id="fc-main-text">Acts 2:38</div>
+            <div class="fc-sub" id="fc-sub-text">Tap to flip</div>
+        </div>
+
+        <div class="quiz-controls">
+            <button class="btn btn-quiz btn-incorrect" id="btn-incorrect">Incorrect</button>
+            <button class="btn btn-quiz btn-correct" id="btn-correct">Correct</button>
+        </div>
+        <div style="margin-top: 5px; text-align: center; padding-bottom: 20px;">
+             <button class="btn btn-text" id="btn-quit">End Session</button>
+        </div>
+    </div>
+
+    <!-- STATS SCREEN -->
+    <div id="stats-screen" class="screen">
+        <h2 style="text-align: center; margin-top: 10px; flex-shrink: 0;">Session Complete</h2>
+        
+        <div class="stats-content">
+            <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                <div class="stat-card" style="flex:1">
+                    <div style="font-size:0.8rem; color:#666;">Time</div>
+                    <div class="stat-big" id="stat-final-time">00:00</div>
+                </div>
+                <div class="stat-card" style="flex:1">
+                    <div style="font-size:0.8rem; color:#666;">Studied</div>
+                    <div class="stat-big" id="stat-total">0</div>
+                </div>
+                <div class="stat-card" style="flex:1">
+                    <div style="font-size:0.8rem; color:#666;">Incorrect</div>
+                    <div class="stat-big" style="color: var(--accent-red)" id="stat-missed-count">0</div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 5px; margin-left: 5px; flex-shrink: 0;">Review List</h3>
+            <!-- List is now flex-grow 1 and scrollable -->
+            <ul id="missed-list" class="missed-list">
+                <!-- Populated by JS -->
+            </ul>
+        </div>
+        
+        <div style="padding-top: 10px; text-align: center; margin-bottom: 20px; flex-shrink: 0;">
+            <button class="btn btn-primary" id="btn-restart">Return Home</button>
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- RAW DATA ---
+    const rawData = `1-THE BIBLE IS THE INFALLIBLE WORD OF GOD
+1A God Himself is the Author of the Bible.
+EXODUS 24:12 And the LORD said unto Moses, Come up to me into the mount, and be there: and I will give thee tables of stone, and a law, and commandments which I have written; that thou mayest teach them.
+DEUTERONOMY 6:6 And these words, which I command thee this day, shall be in thine heart:
+DEUTERONOMY 6:7 And thou shalt teach them diligently unto thy children, and shalt talk of them when thou sittest in thine house, and when thou walkest by the way, and when thou liest down, and when thou risest up.
+DEUTERONOMY 6:8 And thou shalt bind them for a sign upon thine hand, and they shall be as frontlets between thine eyes.
+DEUTERONOMY 6:9 And thou shalt write them upon the posts of thy house, and on thy gates.
+PSALMS 19:7 The law of the LORD is perfect, converting the soul: the testimony of the LORD is sure, making wise the simple.
+PSALMS 19:8 The statutes of the LORD are right, rejoicing the heart: the commandment of the LORD is pure, enlightening the eyes.
+PSALMS 19:9 The fear of the LORD is clean, enduring for ever: the judgments of the LORD are true and righteous altogether.
+PSALMS 19:10 More to be desired are they than gold, yea, than much fine gold: sweeter also than honey and the honeycomb.
+HEBREWS 4:12 For the word of God is quick, and powerful, and sharper than any twoedged sword, piercing even to the dividing asunder of soul and spirit, and of the joints and marrow, and is a discerner of the thoughts and intents of the heart.
+1B Men wrote the words of the Bible as they were divinely inspired by God.
+EXODUS 34:27 And the LORD said unto Moses, Write thou these words: for after the tenor of these words I have made a covenant with thee and with Israel.
+DEUTERONOMY 27:3 And thou shalt write upon them all the words of this law, when thou art passed over, that thou mayest go in unto the land which the LORD thy God giveth thee, a land that floweth with milk and honey; as the LORD God of thy fathers hath promised thee.
+JOSHUA 24:26 And Joshua wrote these words in the book of the law of God, and took a great stone, and set it up there under an oak, that was by the sanctuary of the LORD.
+1 SAMUEL 10:25 Then Samuel told the people the manner of the kingdom, and wrote it in a book, and laid it up before the LORD. And Samuel sent all the people away, every man to his house.
+ISAIAH 30:8 Now go, write it before them in a table, and note it in a book, that it may be for the time to come for ever and ever:
+JEREMIAH 30:1 The word that came to Jeremiah from the LORD, saying,
+JEREMIAH 30:2 Thus speaketh the LORD God of Israel, saying, Write thee all the words that I have spoken unto thee in a book.
+LUKE 1:1 Forasmuch as many have taken in hand to set forth in order a declaration of those things which are most surely believed among us,
+LUKE 1:2 Even as they delivered them unto us, which from the beginning were eyewitnesses, and ministers of the word;
+LUKE 1:3 It seemed good to me also, having had perfect understanding of all things from the very first, to write unto thee in order, most excellent Theophilus,
+2 TIMOTHY 3:16 All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness:
+2 TIMOTHY 3:17 That the man of God may be perfect, throughly furnished unto all good works.
+HEBREWS 1:1 God, who at sundry times and in divers manners spake in time past unto the fathers by the prophets,
+2 PETER 1:20 Knowing this first, that no prophecy of the scripture is of any private interpretation.
+2 PETER 1:21 For the prophecy came not in old time by the will of man: but holy men of God spake as they were moved by the Holy Ghost.
+1C The Bible is without error. It is the Word of salvation and will be true and useful forever.
+PSALMS 12:6 The words of the LORD are pure words: as silver tried in a furnace of earth, purified seven times.
+PSALMS 119:9 Wherewithal shall a young man cleanse his way? by taking heed thereto according to thy word.
+PSALMS 119:89 For ever, O LORD, thy word is settled in heaven.
+PSALMS 119:105 Thy word is a lamp unto my feet, and a light unto my path.
+PSALMS 119:130 The entrance of thy words giveth light; it giveth understanding unto the simple.
+PROVERBS 30:5 Every word of God is pure: he is a shield unto them that put their trust in him.
+ISAIAH 40:8 The grass withereth, the flower fadeth: but the word of our God shall stand for ever.
+LUKE 21:33 Heaven and earth shall pass away: but my words shall not pass away.
+JOHN 15:3 Now ye are clean through the word which I have spoken unto you.
+JOHN 17:17 Sanctify them through thy truth: thy word is truth.
+JOHN 20:30 And many other signs truly did Jesus in the presence of his disciples, which are not written in this book:
+JOHN 20:31 But these are written, that ye might believe that Jesus is the Christ, the Son of God; and that believing ye might have life through his name.
+ROMANS 1:16 For I am not ashamed of the gospel of Christ: for it is the power of God unto salvation to every one that believeth; to the Jew first, and also to the Greek.
+ROMANS 15:4 For whatsoever things were written aforetime were written for our learning, that we through patience and comfort of the scriptures might have hope.
+1 CORINTHIANS 10:11 Now all these things happened unto them for ensamples: and they are written for our admonition, upon whom the ends of the world are come.
+HEBREWS 4:12 For the word of God is quick, and powerful, and sharper than any two-edged sword, piercing even to the dividing asunder of soul and spirit, and of the joints and marrow, and is a discerner of the thoughts and intents of the heart.
+1 PETER 1:25 But the word of the Lord endureth for ever. And this is the word which by the gospel is preached unto you.
+2 PETER 1:19 We have also a more sure word of prophecy; whereunto ye do well that ye take heed, as unto a light that shineth in a dark place, until the day dawn, and the day star arise in your hearts:
+1D The Word of God is food for our soul.
+DEUTERONOMY 8:3 And he humbled thee, and suffered thee to hunger, and fed thee with manna, which thou knewest not, neither did thy fathers know; that he might make thee know that man doth not live by bread only, but by every word that proceedeth out of the mouth of the LORD doth man live.
+JOB 23:12 Neither have I gone back from the commandment of his lips; I have esteemed the words of his mouth more than my necessary food.
+PSALMS 119:103 How sweet are thy words unto my taste! yea, sweeter than honey to my mouth!
+JEREMIAH 15:16 Thy words were found, and I did eat them; and thy word was unto me the joy and rejoicing of mine heart: for I am called by thy name, O LORD God of hosts.
+MATTHEW 4:4 But he answered and said, It is written, Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God.
+1 PETER 2:2 As newborn babes, desire the sincere milk of the word, that ye may grow thereby:
+1E The Word of God should be loved and hidden in our hearts. It is vital to spiritual growth and relationship with God.
+DEUTERONOMY 17:19 And it shall be with him, and he shall read therein all the days of his life: that he may learn to fear the LORD his God, to keep all the words of this law and these statutes, to do them:
+JOSHUA 1:8 This book of the law shall not depart out of thy mouth; but thou shalt meditate therein day and night, that thou mayest observe to do according to all that is written therein: for then thou shalt make thy way prosperous, and then thou shalt have good success.
+PSALMS 37:31 The law of his God is in his heart; none of his steps shall slide.
+PSALMS 40:8 I delight to do thy will, O my God: yea, thy law is within my heart.
+PSALMS 119:11 Thy word have I hid in mine heart, that I might not sin against thee.
+PSALMS 119:16 I will delight myself in thy statutes: I will not forget thy word.
+PSALMS 119:72 The law of thy mouth is better unto me than thousands of gold and silver.
+PSALMS 119:97 O how love I thy law! it is my meditation all the day.
+PSALMS 119:140 Thy word is very pure: therefore thy servant loveth it.
+ISAIAH 34:16 Seek ye out of the book of the LORD, and read: no one of these shall fail, none shall want her mate: for my mouth it hath commanded, and his spirit it hath gathered them.
+HOSEA 4:6 My people are destroyed for lack of knowledge: because thou hast rejected knowledge, I will also reject thee, that thou shalt be no priest to me: seeing thou hast forgotten the law of thy God, I will also forget thy children.
+MATTHEW 22:29 Jesus answered and said unto them, Ye do err, not knowing the scriptures, nor the power of God.
+JOHN 5:39 Search the scriptures; for in them ye think ye have eternal life: and they are they which testify of me.
+COLOSSIANS 3:16 Let the word of Christ dwell in you richly in all wisdom; teaching and admonishing one another in psalms and hymns and spiritual songs, singing with grace in your hearts to the Lord.
+2 TIMOTHY 2:15 Study to shew thyself approved unto God, a workman that needeth not to be ashamed, rightly dividing the word of truth.
+HEBREWS 8:10 For this is the covenant that I will make with the house of Israel after those days, saith the Lord; I will put my laws into their mind, and write them in their hearts: and I will be to them a God, and they shall be to me a people:
+2-ONE GOD, THE MIGHTY GOD IN CHRIST
+2A How many Gods exist?
+DEUTERONOMY 4:35 Unto thee it was shewed, that thou mightest know that the LORD he is God; there is none else beside him.
+DEUTERONOMY 4:39 Know therefore this day, and consider it in thine heart, that the LORD he is God in heaven above, and upon the earth beneath: there is none else.
+DEUTERONOMY 6:4 Hear, O Israel: The LORD our God is one LORD:
+DEUTERONOMY 6:5 And thou shalt love the LORD thy God with all thine heart, and with all thy soul, and with all thy might.
+DEUTERONOMY 32:39 See now that I, even I, am he, and there is no god with me: I kill, and I make alive; I wound, and I heal: neither is there any that can deliver out of my hand.
+PSALMS 86:10 For thou art great, and doest wondrous things: thou art God alone.
+ISAIAH 42:8 I am the LORD: that is my name: and my glory will I not give to another, neither my praise to graven images.
+ISAIAH 43:10 Ye are my witnesses, saith the LORD, and my servant whom I have chosen: that ye may know and believe me, and understand that I am he: before me there was no God formed, neither shall there be after me.
+ISAIAH 43:11 I, even I, am the LORD; and beside me there is no saviour.
+ISAIAH 44:6 Thus saith the LORD the King of Israel, and his redeemer the LORD of hosts; I am the first, and I am the last; and beside me there is no God.
+ISAIAH 45:18 For thus saith the LORD that created the heavens; God himself that formed the earth and made it; he hath established it, he created it not in vain, he formed it to be inhabited: I am the LORD; and there is none else.
+ISAIAH 45:21 Tell ye, and bring them near; yea, let them take counsel together: who hath declared this from ancient time? who hath told it from that time? have not I the LORD? and there is no God else beside me; a just God and a Saviour; there is none beside me.
+ISAIAH 45:22 Look unto me, and be ye saved, all the ends of the earth: for I am God, and there is none else.
+MARK 12:29 And Jesus answered him, The first of all the commandments is, Hear, O Israel; The Lord our God is one Lord:
+1 CORINTHIANS 8:4 As concerning therefore the eating of those things that are offered in sacrifice unto idols, we know that an idol is nothing in the world, and that there is none other God but one.
+EPHESIANS 4:5 One Lord, one faith, one baptism,
+EPHESIANS 4:6 One God and Father of all, who is above all, and through all, and in you all.
+1 TIMOTHY 2:5 For there is one God, and one mediator between God and men, the man Christ Jesus;
+JAMES 2:19 Thou believest that there is one God; thou doest well: the devils also believe, and tremble.
+REVELATION 1:8 I am Alpha and Omega, the beginning and the ending, saith the Lord, which is, and which was, and which is to come, the Almighty.
+2B God is a Spirit.
+1 KINGS 8:27 But will God indeed dwell on the earth? behold, the heaven and heaven of heavens cannot contain thee; how much less this house that I have builded?
+JOHN 4:24 God is a Spirit: and they that worship him must worship him in spirit and in truth.
+ACTS 17:24 God that made the world and all things therein, seeing that he is Lord of heaven and earth, dwelleth not in temples made with hands;
+ACTS 17:25 Neither is worshipped with men's hands, as though he needed any thing, seeing he giveth to all life, and breath, and all things;
+2 CORINTHIANS 3:17 Now the Lord is that Spirit: and where the Spirit of the Lord is, there is liberty.
+1 TIMOTHY 1:17 Now unto the King eternal, immortal, invisible, the only wise God, be honour and glory for ever and ever. Amen.
+2C The one mighty God was manifest in flesh: Jesus Christ, both man and God, the fullness of the Godhead dwelling in Him.
+ISAIAH 9:6 For unto us a child is born, unto us a son is given: and the government shall be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty God, The everlasting Father, The Prince of Peace.
+MATTHEW 1:20 But while he thought on these things, behold, the angel of the Lord appeared unto him in a dream, saying, Joseph, thou son of David, fear not to take unto thee Mary thy wife: for that which is conceived in her is of the Holy Ghost.
+MATTHEW 1:21 And she shall bring forth a son, and thou shalt call his name JESUS: for he shall save his people from their sins.
+MATTHEW 1:22 Now all this was done, that it might be fulfilled which was spoken of the Lord by the prophet, saying,
+MATTHEW 1:23 Behold, a virgin shall be with child, and shall bring forth a son, and they shall call his name Emmanuel, which being interpreted is, God with us.
+JOHN 1:1 In the beginning was the Word, and the Word was with God, and the Word was God.
+JOHN 1:14 And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth.
+JOHN 1:18 No man hath seen God at any time; the only begotten Son, which is in the bosom of the Father, he hath declared him.
+JOHN 8:57 Then said the Jews unto him, Thou art not yet fifty years old, and hast thou seen Abraham?
+JOHN 8:58 Jesus said unto them, Verily, verily, I say unto you, Before Abraham was, I am.
+JOHN 10:30 I and my Father are one.
+JOHN 12:45 And he that seeth me seeth him that sent me.
+JOHN 14:8 Philip saith unto him, Lord, shew us the Father, and it sufficeth us.
+JOHN 14:9 Jesus saith unto him, Have I been so long time with you, and yet hast thou not known me, Philip? he that hath seen me hath seen the Father; and how sayest thou then, Shew us the Father?
+JOHN 14:10 Believest thou not that I am in the Father, and the Father in me? the words that I speak unto you I speak not of myself: but the Father that dwelleth in me, he doeth the works.
+2 CORINTHIANS 4:4 In whom the god of this world hath blinded the minds of them which believe not, lest the light of the glorious gospel of Christ, who is the image of God, should shine unto them.
+2 CORINTHIANS 5:19 To wit, that God was in Christ, reconciling the world unto himself, not imputing their trespasses unto them; and hath committed unto us the word of reconciliation.
+PHILIPPIANS 2:5 Let this mind be in you, which was also in Christ Jesus:
+PHILIPPIANS 2:6 Who, being in the form of God, thought it not robbery to be equal with God:
+PHILIPPIANS 2:7 But made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men:
+PHILIPPIANS 2:8 And being found in fashion as a man, he humbled himself, and became obedient unto death, even the death of the cross.
+COLOSSIANS 1:15 Who is the image of the invisible God, the firstborn of every creature:
+COLOSSIANS 1:19 For it pleased the Father that in him should all fulness dwell;
+COLOSSIANS 2:9 For in him dwelleth all the fulness of the Godhead bodily.
+1 TIMOTHY 3:16 And without controversy great is the mystery of godliness: God was manifest in the flesh, justified in the Spirit, seen of angels, preached unto the Gentiles, believed on in the world, received up into glory.
+TITUS 2:13 Looking for that blessed hope, and the glorious appearing of the great God and our Saviour Jesus Christ;
+2D "Jesus" is the one name of the Father, Son, and Holy Ghost.
+ZECHARIAH 14:9 And the LORD shall be king over all the earth: in that day shall there be one LORD, and his name one.
+MATTHEW 1:21 And she shall bring forth a son, and thou shalt call his name JESUS: for he shall save his people from their sins.
+MATTHEW 28:19 Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost:
+JOHN 5:43 I am come in my Father's name, and ye receive me not: if another shall come in his own name, him ye will receive.
+JOHN 14:17 Even the Spirit of truth; whom the world cannot receive, because it seeth him not, neither knoweth him: but ye know him; for he dwelleth with you, and shall be in you.
+JOHN 14:18 I will not leave you comfortless: I will come to you.
+JOHN 14:26 But the Comforter, which is the Holy Ghost, whom the Father will send in my name, he shall teach you all things, and bring all things to your remembrance, whatsoever I have said unto you.
+ACTS 4:12 Neither is there salvation in any other: for there is none other name under heaven given among men, whereby we must be saved.
+ACTS 7:59 And they stoned Stephen, calling upon God, and saying, Lord Jesus, receive my spirit.
+ACTS 9:5 And he said, Who art thou, Lord? And the Lord said, I am Jesus whom thou persecutest: it is hard for thee to kick against the pricks.
+3-SIN AND SALVATION
+3A What is sin?
+PROVERBS 21:4 An high look, and a proud heart, and the plowing of the wicked, is sin.
+PROVERBS 24:9 The thought of foolishness is sin: and the scorner is an abomination to men.
+GALATIANS 5:19 Now the works of the flesh are manifest, which are these; Adultery, fornication, uncleanness, lasciviousness,
+GALATIANS 5:20 Idolatry, witchcraft, hatred, variance, emulations, wrath, strife, seditions, heresies,
+GALATIANS 5:21 Envyings, murders, drunkenness, revellings, and such like: of the which I tell you before, as I have also told you in time past, that they which do such things shall not inherit the kingdom of God.
+JAMES 4:17 Therefore to him that knoweth to do good, and doeth it not, to him it is sin.
+1 JOHN 3:4 Whosoever committeth sin transgresseth also the law: for sin is the transgression of the law.
+3B All mankind are sinners.
+PSALMS 51:5 Behold, I was shapen in iniquity, and in sin did my mother conceive me.
+PSALMS 53:3 Every one of them is gone back: they are altogether become filthy; there is none that doeth good, no, not one.
+ISAIAH 53:6 All we like sheep have gone astray; we have turned every one to his own way; and the LORD hath laid on him the iniquity of us all.
+ISAIAH 64:6 But we are all as an unclean thing, and all our righteousnesses are as filthy rags; and we all do fade as a leaf; and our iniquities, like the wind, have taken us away.
+JEREMIAH 17:9 The heart is deceitful above all things, and desperately wicked: who can know it?
+ROMANS 3:10 As it is written, There is none righteous, no, not one:
+ROMANS 3:11 There is none that understandeth, there is none that seeketh after God.
+ROMANS 3:12 They are all gone out of the way, they are together become unprofitable; there is none that doeth good, no, not one.
+ROMANS 3:23 For all have sinned, and come short of the glory of God;
+ROMANS 5:12 Wherefore, as by one man sin entered into the world, and death by sin; and so death passed upon all men, for that all have sinned:
+ROMANS 5:14 Nevertheless death reigned from Adam to Moses, even over them that had not sinned after the similitude of Adam's transgression, who is the figure of him that was to come.
+ROMANS 5:19 For as by one man's disobedience many were made sinners, so by the obedience of one shall many be made righteous.
+ROMANS 6:23 For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord.
+JAMES 1:14 But every man is tempted, when he is drawn away of his own lust, and enticed.
+JAMES 1:15 Then when lust hath conceived, it bringeth forth sin: and sin, when it is finished, bringeth forth death.
+1 JOHN 1:8 If we say that we have no sin, we deceive ourselves, and the truth is not in us.
+3C Jesus Christ provides salvation.
+ISAIAH 12:2 Behold, God is my salvation; I will trust, and not be afraid: for the LORD JEHOVAH is my strength and my song; he also is become my salvation.
+ISAIAH 53:1 Who hath believed our report? and to whom is the arm of the LORD revealed?
+ISAIAH 53:2 For he shall grow up before him as a tender plant, and as a root out of a dry ground: he hath no form nor comeliness; and when we shall see him, there is no beauty that we should desire him.
+ISAIAH 53:3 He is despised and rejected of men; a man of sorrows, and acquainted with grief: and we hid as it were our faces from him; he was despised, and we esteemed him not.
+ISAIAH 53:4 Surely he hath borne our griefs, and carried our sorrows: yet we did esteem him stricken, smitten of God, and afflicted.
+ISAIAH 53:5 But he was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; and with his stripes we are healed.
+ISAIAH 53:6 All we like sheep have gone astray, we have turned every one to his own way; and the LORD hath laid on him the iniquity of us all.
+ISAIAH 53:7 He was oppressed, and he was afflicted, yet he opened not his mouth: he is brought as a lamb to the slaughter, and as a sheep before her shearers is dumb, so he openeth not his mouth.
+LUKE 2:11 For unto you is born this day in the city of David a Saviour, which is Christ the Lord.
+LUKE 19:10 For the Son of man is come to seek and to save that which was lost.
+JOHN 1:29 The next day John seeth Jesus coming unto him, and saith, Behold the Lamb of God, which taketh away the sin of the world.
+JOHN 3:14 And as Moses lifted up the serpent in the wilderness, even so must the Son of man be lifted up:
+JOHN 3:15 That whosoever believeth in him should not perish, but have eternal life.
+JOHN 3:16 For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.
+JOHN 3:17 For God sent not his Son into the world to condemn the world; but that the world through him might be saved.
+JOHN 10:11 I am the good shepherd: the good shepherd giveth his life for the sheep.
+JOHN 15:13 Greater love hath no man than this, that a man lay down his life for his friends.
+ROMANS 5:6 For when we were yet without strength, in due time Christ died for the ungodly.
+ROMANS 6:23 For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord.
+1 CORINTHIANS 15:3 For I delivered unto you first of all that which I also received, how that Christ died for our sins according to the scriptures;
+1 TIMOTHY 1:15 This is a faithful saying, and worthy of all acceptation, that Christ Jesus came into the world to save sinners; of whom I am chief.
+HEBREWS 2:9 But we see Jesus, who was made a little lower than the angels for the suffering of death, crowned with glory and honour; that he by the grace of God should taste death for every man.
+HEBREWS 9:28 So Christ was once offered to bear the sins of many; and unto them that look for him shall he appear the second time without sin unto salvation.
+1 PETER 2:24 Who his own self bare our sins in his own body on the tree, that we, being dead to sins, should live unto righteousness: by whose stripes ye were healed.
+1 PETER 3:18 For Christ also hath once suffered for sins, the just for the unjust, that he might bring us to God, being put to death in the flesh, but quickened by the Spirit:
+REVELATION 5:9 And they sung a new song, saying, Thou art worthy to take the book, and to open the seals thereof: for thou wast slain, and hast redeemed us to God by thy blood out of every kindred, and tongue, and people, and nation;
+3D The blood of a sinless sacrifice atoned for our sins.
+EXODUS 12:13 And the blood shall be to you for a token upon the houses where ye are: and when I see the blood, I will pass over you, and the plague shall not be upon you to destroy you, when I smite the land of Egypt.
+LEVITICUS 17:11 For the life of the flesh is in the blood: and I have given it to you upon the altar to make an atonement for your souls: for it is the blood that maketh an atonement for the soul.
+MATTHEW 26:28 For this is my blood of the new testament, which is shed for many for the remission of sins.
+ROMANS 5:9 Much more then, being now justified by his blood, we shall be saved from wrath through him.
+HEBREWS 9:14 How much more shall the blood of Christ, who through the eternal Spirit offered himself without spot to God, purge your conscience from dead works to serve the living God?
+HEBREWS 9:22 And almost all things are by the law purged with blood; and without shedding of blood is no remission.
+1 PETER 1:18 Forasmuch as ye know that ye were not redeemed with corruptible things, as silver and gold, from your vain conversation received by tradition from your fathers;
+1 PETER 1:19 But with the precious blood of Christ, as of a lamb without blemish and without spot:
+1 JOHN 1:7 But if we walk in the light, as he is in the light, we have fellowship one with another, and the blood of Jesus Christ his Son cleanseth us from all sin.
+3E Obedience is essential to salvation.
+1 SAMUEL 15:22 And Samuel said, Hath the LORD as great delight in burnt offerings and sacrifices, as in obeying the voice of the LORD? Behold, to obey is better than sacrifice, and to hearken than the fat of rams.
+JOHN 8:31 Then said Jesus to those Jews which believed on him, If ye continue in my word, then are ye my disciples indeed;
+ROMANS 6:16 Know ye not, that to whom ye yield yourselves servants to obey, his servants ye are to whom ye obey; whether of sin unto death, or of obedience unto righteousness?
+JAMES 1:25 But whoso looketh into the perfect law of liberty, and continueth therein, he being not a forgetful hearer, but a doer of the work, this man shall be blessed in his deed.
+REVELATION 22:14 Blessed are they that do his commandments, that they may have right to the tree of life, and may enter in through the gates into the city.
+3F Active faith and belief is essential to salvation.
+MARK 16:16 He that believeth and is baptized shall be saved; but he that believeth not shall be damned.
+JOHN 7:38 He that believeth on me, as the scripture hath said, out of his belly shall flow rivers of living water.
+ACTS 16:31 And they said, Believe on the Lord Jesus Christ, and thou shalt be saved, and thy house.
+ROMANS 10:9 That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved.
+ROMANS 10:10 For with the heart man believeth unto righteousness; and with the mouth confession is made unto salvation.
+ROMANS 10:11 For the scripture saith, Whosoever believeth on him shall not be ashamed.
+ROMANS 10:12 For there is no difference between the Jew and the Greek: for the same Lord over all is rich unto all that call upon him.
+ROMANS 10:13 For whosoever shall call upon the name of the Lord shall be saved.
+EPHESIANS 2:8 For by grace are ye saved through faith; and that not of yourselves: it is the gift of God:
+HEBREWS 11:6 But without faith it is impossible to please him: for he that cometh to God must believe that he is, and that he is a rewarder of them that diligently seek him.
+3G Repentance is essential to salvation.
+2 CHRONICLES 7:14 If my people, which are called by my name, shall humble themselves, and pray, and seek my face, and turn from their wicked ways; then will I hear from heaven, and will forgive their sin, and will heal their land.
+PSALMS 34:18 The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.
+ISAIAH 55:7 Let the wicked forsake his way, and the unrighteous man his thoughts: and let him return unto the LORD, and he will have mercy upon him; and to our God, for he will abundantly pardon.
+EZEKIEL 18:21 But if the wicked will turn from all his sins that he hath committed, and keep all my statutes, and do that which is lawful and right, he shall surely live, he shall not die.
+LUKE 13:3 I tell you, Nay: but, except ye repent, ye shall all likewise perish.
+LUKE 24:47 And that repentance and remission of sins should be preached in his name among all nations, beginning at Jerusalem.
+ACTS 2:38 Then Peter said unto them, Repent, and be baptized every one of you in the name of Jesus Christ for the remission of sins, and ye shall receive the gift of the Holy Ghost.
+ACTS 3:19 Repent ye therefore, and be converted, that your sins may be blotted out, when the times of refreshing shall come from the presence of the Lord;
+ACTS 17:30 And the times of this ignorance God winked at; but now commandeth all men every where to repent:
+2 CORINTHIANS 7:10 For godly sorrow worketh repentance to salvation not to be repented of: but the sorrow of the world worketh death.
+2 PETER 3:9 The Lord is not slack concerning his promise, as some men count slackness; but is longsuffering to us-ward, not willing that any should perish, but that all should come to repentance.
+3H Water baptism is essential to salvation.
+MARK 16:16 He that believeth and is baptized shall be saved; but he that believeth not shall be damned.
+JOHN 3:3 Jesus answered and said unto him, Verily, verily, I say unto thee, Except a man be born again, he cannot see the kingdom of God.
+JOHN 3:4 Nicodemus saith unto him, How can a man be born when he is old? can he enter the second time into his mother's womb, and be born?
+JOHN 3:5 Jesus answered, Verily, verily, I say unto thee, Except a man be born of water and of the Spirit, he cannot enter into the kingdom of God.
+ACTS 2:38 Then Peter said unto them, Repent, and be baptized every one of you in the name of Jesus Christ for the remission of sins, and ye shall receive the gift of the Holy Ghost.
+1 PETER 3:20 Which sometime were disobedient, when once the longsuffering of God waited in the days of Noah, while the ark was a preparing, wherein few, that is, eight souls were saved by water.
+1 PETER 3:21 The like figure whereunto even baptism doth also now save us (not the putting away of the filth of the flesh, but the answer of a good conscience toward God,) by the resurrection of Jesus Christ:
+3H1 Water baptism should be performed in the name of the Lord Jesus Christ.
+MATTHEW 28:19 Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost:
+ACTS 2:38 Then Peter said unto them, Repent, and be baptized every one of you in the name of Jesus Christ for the remission of sins, and ye shall receive the gift of the Holy Ghost.
+ACTS 4:12 Neither is there salvation in any other: for there is none other name under heaven given among men, whereby we must be saved.
+ACTS 8:12 But when they believed Philip preaching the things concerning the kingdom of God, and the name of Jesus Christ, they were baptized, both men and women.
+ACTS 8:14 Now when the apostles which were at Jerusalem heard that Samaria had received the word of God, they sent unto them Peter and John:
+ACTS 8:15 Who, when they were come down, prayed for them, that they might receive the Holy Ghost:
+ACTS 8:16 (For as yet he was fallen upon none of them: only they were baptized in the name of the Lord Jesus.)
+ACTS 10:47 Can any man forbid water, that these should not be baptized, which have received the Holy Ghost as well as we?
+ACTS 10:48 And he commanded them to be baptized in the name of the Lord. Then prayed they him to tarry certain days.
+ACTS 19:1 And it came to pass, that, while Apollos was at Corinth, Paul having passed through the upper coasts came to Ephesus: and finding certain disciples,
+ACTS 19:2 He said unto them, Have ye received the Holy Ghost since ye believed? And they said unto him, We have not so much as heard whether there be any Holy Ghost.
+ACTS 19:3 And he said unto them, Unto what then were ye baptized? And they said, Unto John's baptism.
+ACTS 19:4 Then said Paul, John verily baptized with the baptism of repentance, saying unto the people, that they should believe on him which should come after him, that is, on Christ Jesus.
+ACTS 19:5 When they heard this, they were baptized in the name of the Lord Jesus.
+ACTS 22:16 And now why tarriest thou? arise, and be baptized, and wash away thy sins, calling on the name of the Lord.
+ROMANS 6:3 Know ye not, that so many of us as were baptized into Jesus Christ were baptized into his death?
+ROMANS 6:4 Therefore we are buried with him by baptism into death: that like as Christ was raised up from the dead by the glory of the Father, even so we also should walk in newness of life.
+GALATIANS 3:27 For as many of you as have been baptized into Christ have put on Christ.
+3H2 Water baptism should be performed by immersion.
+MATTHEW 3:16 And Jesus, when he was baptized, went up straightway out of the water: and, lo, the heavens were opened unto him, and he saw the Spirit of God descending like a dove, and lighting upon him:
+JOHN 3:23 And John also was baptizing in Aenon near to Salim, because there was much water there: and they came, and were baptized.
+ACTS 8:35 Then Philip opened his mouth, and began at the same scripture, and preached unto him Jesus.
+ACTS 8:36 And as they went on their way, they came unto a certain water: and the eunuch said, See, here is water; what doth hinder me to be baptized?
+ACTS 8:37 And Philip said, If thou believest with all thine heart, thou mayest. And he answered and said, I believe that Jesus Christ is the Son of God.
+ACTS 8:38 And he commanded the chariot to stand still: and they went down both into the water, both Philip and the eunuch; and he baptized him.
+ACTS 8:39 And when they were come up out of the water, the Spirit of the Lord caught away Philip, that the eunuch saw him no more: and he went on his way rejoicing.
+ROMANS 6:4 Therefore we are buried with him by baptism into death: that like as Christ was raised up from the dead by the glory of the Father, even so we also should walk in newness of life.
+3I The baptism of the Holy Ghost is essential to salvation.
+EZEKIEL 36:26 A new heart also will I give you, and a new spirit will I put within you: and I will take away the stony heart out of your flesh, and I will give you an heart of flesh.
+EZEKIEL 36:27 And I will put my spirit within you, and cause you to walk in my statutes, and ye shall keep my judgments, and do them.
+JOEL 2:28 And it shall come to pass afterward, that I will pour out my spirit upon all flesh; and your sons and your daughters shall prophesy, your old men shall dream dreams, your young men shall see visions:
+JOEL 2:29 And also upon the servants and upon the handmaids in those days will I pour out my spirit.
+MATTHEW 3:11 I indeed baptize you with water unto repentance: but he that cometh after me is mightier than I, whose shoes I am not worthy to bear: he shall baptize you with the Holy Ghost, and with fire:
+LUKE 11:13 If ye then, being evil, know how to give good gifts unto your children: how much more shall your heavenly Father give the Holy Spirit to them that ask him?
+LUKE 24:49 And, behold, I send the promise of my Father upon you: but tarry ye in the city of Jerusalem, until ye be endued with power from on high.
+JOHN 3:7 Marvel not that I said unto thee, Ye must be born again.
+JOHN 3:8 The wind bloweth where it listeth, and thou hearest the sound thereof, but canst not tell whence it cometh, and whither it goeth: so is every one that is born of the Spirit.
+JOHN 7:37 In the last day, that great day of the feast, Jesus stood and cried, saying, If any man thirst, let him come unto me, and drink.
+JOHN 7:38 He that believeth on me, as the scripture hath said, out of his belly shall flow rivers of living water.
+JOHN 7:39 (But this spake he of the Spirit, which they that believe on him should receive: for the Holy Ghost was not yet given; because that Jesus was not yet glorified.)
+JOHN 14:16 And I will pray the Father, and he shall give you another Comforter, that he may abide with you for ever;
+JOHN 14:17 Even the Spirit of truth; whom the world cannot receive, because it seeth him not, neither knoweth him: but ye know him; for he dwelleth with you, and shall be in you
+JOHN 14:18 I will not leave you comfortless: I will come to you.
+ACTS 1:4 And, being assembled together with them, commanded them that they should not depart from Jerusalem, but wait for the promise of the Father, which, saith he, ye have heard of me.
+ACTS 1:5 For John truly baptized with water; but ye shall be baptized with the Holy Ghost not many days hence.
+ACTS 2:16 But this is that which was spoken by the prophet Joel;
+ACTS 2:17 And it shall come to pass in the last days, saith God, I will pour out of my Spirit upon all flesh: and your sons and your daughters shall prophesy, and your young men shall see visions, and your old men shall dream dreams:
+ACTS 2:18 And on my servants and on my handmaidens I will pour out in those days of my Spirit; and they shall prophesy:
+ACTS 2:37 Now when they heard this, they were pricked in their heart, and said unto Peter and to the rest of the apostles, Men and brethren, what shall we do?
+ACTS 2:38 Then Peter said unto them, Repent, and be baptized every one of you in the name of Jesus Christ for the remission of sins, and ye shall receive the gift of the Holy Ghost.
+ACTS 2:39 For the promise is unto you, and to your children, and to all that are afar off, even as many as the Lord our God shall call.
+ACTS 8:14 Now when the apostles which were at Jerusalem heard that Samaria had received the word of God, they sent unto them Peter and John:
+ACTS 8:15 Who, when they were come down, prayed for them, that they might receive the Holy Ghost:
+ACTS 8:16 (For as yet he was fallen upon none of them: only they were baptized in the name of the Lord Jesus.)
+ACTS 8:17 Then laid they their hands on them, and they received the Holy Ghost.
+ACTS 10:44 While Peter yet spake these words, the Holy Ghost fell on all them which heard the word.
+ACTS 10:45 And they of the circumcision which believed were astonished, as many as came with Peter, because that on the Gentiles also was poured out the gift of the Holy Ghost.
+ACTS 10:46 For they heard them speak with tongues, and magnify God. Then answered Peter,
+ACTS 10:47 Can any man forbid water, that these should not be baptized, which have received the Holy Ghost as well as we?
+ACTS 11:16 Then remembered I the word of the Lord, how that he said, John indeed baptized with water; but ye shall be baptized with the Holy Ghost.
+ACTS 11:17 Forasmuch then as God gave them the like gift as he did unto us, who believed on the Lord Jesus Christ; what was I, that I could withstand God?
+ACTS 11:18 When they heard these things, they held their peace, and glorified God, saying, Then hath God also to the Gentiles granted repentance unto life.
+ACTS 19:6 And when Paul had laid his hands upon them, the Holy Ghost came on them; and they spake with tongues, and prophesied.
+ROMANS 8:9 But ye are not in the flesh, but in the Spirit, if so be that the Spirit of God dwell in you. Now if any man have not the Spirit of Christ, he is none of his.
+ROMANS 8:10 And if Christ be in you, the body is dead because of sin; but the Spirit is life because of righteousness.
+ROMANS 8:11 But if the Spirit of him that raised up Jesus from the dead dwell in you, he that raised up Christ from the dead shall also quicken your mortal bodies by his Spirit that dwelleth in you.
+3I1 Speaking in tongues is the initial, outward evidence of the infilling of the Holy Ghost.
+MARK 16:17 And these signs shall follow them that believe; In my name shall they cast out devils; they shall speak with new tongues;
+ACTS 2:1 And when the day of Pentecost was fully come, they were all with one accord in one place.
+ACTS 2:2 And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.
+ACTS 2:3 And there appeared unto them cloven tongues like as of fire, and it sat upon each of them.
+ACTS 2:4 And they were all filled with the Holy Ghost, and began to speak with other tongues, as the Spirit gave them utterance.
+ACTS 2:5 And there were dwelling at Jerusalem Jews, devout men, out of every nation under heaven.
+ACTS 2:6 Now when this was noised abroad, the multitude came together, and were confounded, because that every man heard them speak in his own language.
+ACTS 2:7 And they were all amazed and marveled, saying one to another, Behold, are not all these which speak Galilaeans?
+ACTS 2:8 And how hear we every man in our own tongue, wherein we were born?
+ACTS 2:9 Parthians, and Medes, and Elamites, and the dwellers in Mesopotamia, and in Judaea, and Cappadocia, in Pontus, and Asia,
+ACTS 2:10 Phrygia, and Pamphylia, in Egypt, and in the parts of Libya about Cyrene, and strangers of Rome, Jews and proselytes,
+ACTS 2:11 Cretes and Arabians, we do hear them speak in our tongues the wonderful works of God.
+ACTS 2:33 Therefore being by the right hand of God exalted, and having received of the Father the promise of the Holy Ghost, he hath shed forth this, which ye now see and hear.
+ACTS 10:44 While Peter yet spake these words, the Holy Ghost fell on all them which heard the word.
+ACTS 10:45 And they of the circumcision which believed were astonished, as many as came with Peter, because that on the Gentiles also was poured out the gift of the Holy Ghost.
+ACTS 10:46 For they heard them speak with tongues, and magnify God. Then answered Peter,
+ACTS 19:6 And when Paul had laid his hands upon them, the Holy Ghost came on them, and they spake with tongues, and prophesied.
+3I2 The baptism of the Holy Ghost brings abundant benefits.
+ZECHARIAH 4:6 Then he answered and spake unto me, saying, This is the word of the LORD unto Zerubbabel, saying, Not by might, nor by power, but by my spirit, saith the LORD of hosts.
+LUKE 12:12 For the Holy Ghost shall teach you in the same hour what ye ought to say.
+JOHN 6:63 It is the spirit that quickeneth; the flesh profiteth nothing: the words that I speak unto you, they are spirit, and they are life.
+JOHN 14:26 But the Comforter, which is the Holy Ghost, whom the Father will send in my name, he shall teach you all things, and bring all things to your remembrance, whatsoever I have said unto you..
+JOHN 16:13 Howbeit when he, the Spirit of truth, is come, he will guide you into all truth: for he shall not speak of himself; but whatsoever he shall hear, that shall he speak: and he will shew you things to come.
+ACTS 1:8 But ye shall receive power, after that the Holy Ghost is come upon you: and ye shall be witnesses unto me both in Jerusalem, and in all Judaea, and in Samaria, and unto the uttermost part of the earth.
+ACTS 4:31 And when they had prayed, the place was shaken where they were assembled together; and they were all filled with the Holy Ghost, and they spake the word of God with boldness.
+ACTS 4:32 And the multitude of them that believed were of one heart and of one soul: neither said any of them that ought of the things which he possessed was his own; but they had all things common.
+ACTS 4:33 And with great power gave the apostles witness of the resurrection of the Lord Jesus: and great grace was upon them all.
+ROMANS 5:5 And hope maketh not ashamed; because the love of God is shed abroad in our hearts by the Holy Ghost which is given unto us.
+ROMANS 8:11 But if the Spirit of him that raised up Jesus from the dead dwell in you, he that raised up Christ from the dead shall also quicken your mortal bodies by his Spirit that dwelleth in you.
+ROMANS 8:12 Therefore, brethren, we are debtors, not to the flesh, to live after the flesh.
+ROMANS 8:13 For if ye live after the flesh, ye shall die: but if ye through the Spirit do mortify the deeds of the body, ye shall live.
+ROMANS 8:14 For as many as are led by the Spirit of God, they are the sons of God.
+ROMANS 8:15 For ye have not received the spirit of bondage again to fear; but ye have received the Spirit of adoption, whereby we cry, Abba, Father.
+ROMANS 8:16 The Spirit itself beareth witness with our spirit, that we are the children of God:
+ROMANS 8:17 And if children, then heirs; heirs of God, and joint-heirs with Christ; if so be that we suffer with him, that we may be also glorified together.
+ROMANS 8:26 Likewise the Spirit also helpeth our infirmities: for we know not what we should pray for as we ought: but the Spirit itself maketh intercession for us with groanings which cannot be uttered.
+ROMANS 8:27 And he that searcheth the hearts knoweth what is the mind of the Spirit, because he maketh intercession for the saints according to the will of God.
+1 CORINTHIANS 12:13 For by one Spirit are we all baptized into one body, whether we be Jews or Gentiles, whether we be bond or free; and have been all made to drink into one Spirit.
+2 CORINTHIANS 3:6 Who also hath made us able ministers of the new testament; not of the letter, but of the spirit: for the letter killeth, but the spirit giveth life.
+2 CORINTHIANS 3:17 Now the Lord is that Spirit: and where the Spirit of the Lord is, there is liberty.
+GALATIANS 4:6 And because ye are sons, God hath sent forth the Spirit of his Son into your hearts, crying, Abba, Father.
+EPHESIANS 1:13 In whom ye also trusted, after that ye heard the word of truth, the gospel of your salvation: in whom also after that ye believed, ye were sealed with that holy Spirit of promise,
+EPHESIANS 1:14 Which is the earnest of our inheritance until the redemption of the purchased possession, unto the praise of his glory.
+4-CHRISTIAN LIVING
+4A Holiness should be embraced in the life of the believer.
+4A1 Because God is holy, we are to be holy.
+LEVITICUS 11:45 For I am the LORD that bringeth you up out of the land of Egypt, to be your God: ye shall therefore be holy, for I am holy.
+LEVITICUS 20:26 And ye shall be holy unto me: for I the LORD am holy, and have severed you from other people, that ye should be mine.
+PSALMS 5:4 For thou art not a God that hath pleasure in wickedness: neither shall evil dwell with thee.
+PSALMS 29:2 Give unto the LORD the glory due unto his name; worship the LORD in the beauty of holiness.
+PSALMS 145:17 The LORD is righteous in all his ways, and holy in all his works.
+ISAIAH 35:8 And an highway shall be there, and a way, and it shall be called The way of holiness; the unclean shall not pass over it; but it shall be for those: the wayfaring men, though fools, shall not err therein.
+MATTHEW 5:8 Blessed are the pure in heart: for they shall see God.
+2 CORINTHIANS 7:1 Having therefore these promises, dearly beloved, let us cleanse ourselves from all filthiness of the flesh and spirit, perfecting holiness in the fear of God.
+EPHESIANS 4:22 That ye put off concerning the former conversation the old man, which is corrupt according to the deceitful lusts;
+EPHESIANS 4:23 And be renewed in the spirit of your mind;
+EPHESIANS 4:24 And that ye put on the new man, which after God is created in righteousness and true holiness.
+EPHESIANS 5:27 That he might present it to himself a glorious church, not having spot, or wrinkle, or any such thing; but that it should be holy and without blemish.
+1 THESSALONIANS 3:12 And the Lord make you to increase and abound in love one toward another, and toward all men, even as we do toward you:
+1 THESSALONIANS 3:13 To the end he may stablish your hearts unblameable in holiness before God, even our Father, at the coming of our Lord Jesus Christ with all his saints.
+HEBREWS 12:14 Follow peace with all men, and holiness, without which no man shall see the Lord:
+HEBREWS 12:15 Looking diligently lest any man fail of the grace of God; lest any root of bitterness springing up trouble you, and thereby many be defiled;
+1 PETER 2:9 But ye are a chosen generation, a royal priesthood, an holy nation, a peculiar people; that ye should shew forth the praises of him who hath called you out of darkness into his marvellous light;
+1 JOHN 1:5 This then is the message which we have heard of him, and declare unto you, that God is light, and in him is no darkness at all.
+REVELATION 21:27 And there shall in no wise enter into it any thing that defileth, neither whatsoever worketh abomination, or maketh a lie: but they which are written in the Lamb's book of life.
+4A2 We are separated for God and from the world.
+EXODUS 23:2 Thou shalt not follow a multitude to do evil; neither shalt thou speak in a cause to decline after many to wrest judgment:
+DEUTERONOMY 12:30 Take heed to thyself that thou be not snared by following them, after that they be destroyed from before thee; and that thou enquire not after their gods, saying, How did these nations serve their gods? even so will I do likewise.
+PSALMS 19:14 Let the words of my mouth, and the meditation of my heart, be acceptable in thy sight, O LORD, my strength, and my redeemer.
+PSALMS 101:3 I will set no wicked thing before mine eyes: I hate the work of them that turn aside; it shall not cleave to me.
+PROVERBS 1:10 My son, if sinners entice thee, consent thou not.
+PROVERBS 24:1 Be not thou envious against evil men, neither desire to be with them.
+ACTS 2:40 And with many other words did he testify and exhort, saying, Save yourselves from this untoward generation.
+ROMANS 12:1 I beseech you therefore, brethren, by the mercies of God, that ye present your bodies a living sacrifice, holy, acceptable unto God, which is your reasonable service.
+ROMANS 12:2 And be not conformed to this world: but be ye transformed by the renewing of your mind, that ye may prove what is that good, and acceptable, and perfect, will of God.
+1 CORINTHIANS 3:16 Know ye not that ye are the temple of God, and that the Spirit of God dwelleth in you?
+1 CORINTHIANS 3:17 If any man defile the temple of God, him shall God destroy; for the temple of God is holy, which temple ye are.
+1 CORINTHIANS 6:9 Know ye not that the unrighteous shall not inherit the kingdom of God? Be not deceived: neither fornicators, nor idolaters, nor adulterers, nor effeminate, nor abusers of themselves with mankind,
+1 CORINTHIANS 6:10 Nor thieves, nor covetous, nor drunkards, nor revilers, nor extortioners, shall inherit the kingdom of God.
+1 CORINTHIANS 6:11 And such were some of you: but ye are washed, but ye are sanctified, but ye are justified in the name of the Lord Jesus, and by the Spirit of our God.
+1 CORINTHIANS 6:15 Know ye not that your bodies are the members of Christ? shall I then take the members of Christ, and make them the members of an harlot? God forbid.
+1 CORINTHIANS 6:16 What? know ye not that he which is joined to an harlot is one body? for two, saith he, shall be one flesh.
+1 CORINTHIANS 6:17 But he that is joined unto the Lord is one spirit.
+1 CORINTHIANS 6:18 Flee fornication. Every sin that a man doeth is without the body; but he that committeth fornication sinneth against his own body.
+1 CORINTHIANS 6:19 What? know ye not that your body is the temple of the Holy Ghost which is in you, which ye have of God, and ye are not your own?
+1 CORINTHIANS 6:20 For ye are bought with a price: therefore glorify God in your body, and in your spirit, which are God's.
+1 CORINTHIANS 15:33 Be not deceived: evil communications corrupt good manners.
+2 CORINTHIANS 6:14 Be ye not unequally yoked together with unbelievers: for what fellowship hath righteousness with unrighteousness? and what communion hath light with darkness?
+2 CORINTHIANS 6:15 And what concord hath Christ with Belial? or what part hath he that believeth with an infidel?
+2 CORINTHIANS 6:16 And what agreement hath the temple of God with idols? for ye are the temple of the living God; as God hath said, I will dwell in them, and walk in them; and I will be their God, and they shall be my people.
+2 CORINTHIANS 6:17 Wherefore come out from among them, and be ye separate, saith the Lord, and touch not the unclean thing; and I will receive you.
+EPHESIANS 4:29 Let no corrupt communication proceed out of your mouth, but that which is good to the use of edifying, that it may minister grace unto the hearers.
+EPHESIANS 4:30 And grieve not the holy Spirit of God, whereby ye are sealed unto the day of redemption.
+EPHESIANS 4:31 Let all bitterness, and wrath, and anger, and clamour, and evil speaking, be put away from you, with all malice:
+EPHESIANS 4:32 And be ye kind one to another, tenderhearted, forgiving one another, even as God for Christ's sake hath forgiven you.
+EPHESIANS 5:11 And have no fellowship with the unfruitful works of darkness, but rather reprove them.
+COLOSSIANS 3:2 Set your affection on things above, not on things on the earth.
+COLOSSIANS 3:8 But now ye also put off all these; anger, wrath, malice, blasphemy, filthy communication out of your mouth.
+2 TIMOTHY 2:4 No man that warreth entangleth himself with the affairs of this life; that he may please him who hath chosen him to be a soldier.
+TITUS 2:11 For the grace ace of God that bringeth salvation hath appeared to all men,
+TITUS 2:12 Teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly, in this present world;
+HEBREWS 11:24 By faith Moses, when he was come to years, refused to be called the son of Pharaoh's daughter;
+HEBREWS 11:25 Choosing rather to suffer affliction with the people of God, than to enjoy the pleasures of sin for a season;
+JAMES 4:4 Ye adulterers and adulteresses, know ye not that the friendship of the world is enmity with God? whosoever therefore will be a friend of the world is the enemy of God.
+1 JOHN 2:15 Love not the world, neither the things that are in the world. If any man love the world, the love of the Father is not in him.
+REVELATION 21:8 But the fearful, and unbelieving, and the abominable, and murderers, and whoremongers, and sorcerers, and idolaters, and all liars, shall have their part in the lake which burneth with fire and brimstone: which is the second death.
+4B The inner work of the Spirit will be active outwardly.
+4B1 The fruit of the Spirit is evident in the Spirit-filled life.
+1 CORINTHIANS 13:4 Charity suffereth long, and is kind; charity envieth not; charity vaunteth not itself, is not puffed up,
+1 CORINTHIANS 13:5 Doth not behave itself unseemly, seeketh not her own, is not easily provoked, thinketh no evil;
+1 CORINTHIANS 13:6 Rejoiceth not in iniquity, but rejoiceth in the truth;
+1 CORINTHIANS 13:7 Beareth all things, believeth all things, hopeth all things, endureth all things.
+1 CORINTHIANS 13:8 Charity never faileth: but whether there be prophecies, they shall fail; whether there be tongues, they shall cease; whether there be knowledge, it shall vanish away.
+GALATIANS 5:22 But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith,
+GALATIANS 5:23 Meekness, temperance: against such there is no law.
+EPHESIANS 5:8 For ye were sometimes darkness, but now are ye light in the Lord: walk as children of light:
+EPHESIANS 5:9 (For the fruit of the Spirit is in all goodness and righteousness and truth;)
+EPHESIANS 5:10 Proving what is acceptable unto the Lord.
+PHILIPPIANS 1:9 And this I pray, that your love may abound yet more and more in knowledge and in all judgment;
+PHILIPPIANS 1:10 That ye may approve things that are excellent; that ye may be sincere and without offence till the day of Christ;
+PHILIPPIANS 1:11 Being filled with the fruits of righteousness, which are by Jesus Christ, unto the glory and praise of God.
+4B2 Christian character and attitudes are to be developed.
+1 CORINTHIANS 13:11 When I was a child, I spake as a child, I understood as a child, I thought as a child: but when I became a man, I put away childish things.
+EPHESIANS 4:11 And he gave some, apostles; and some, prophets; and some, evangelists; and some, pastors and teachers;
+EPHESIANS 4:12 For the perfecting of the saints, for the work of the ministry, for the edifying of the body of Christ:
+EPHESIANS 4:13 Till we all come in the unity of the faith, and of the knowledge of the Son of God, unto a perfect man, unto the measure of the stature of the fulness of Christ:
+EPHESIANS 4:14 That we henceforth be no more children, tossed to and fro, and carried about with every wind of doctrine, by the sleight of men, and cunning craftiness, whereby they lie in wait to deceive;
+EPHESIANS 4:15 But speaking the truth in love, may grow up into him in all things, which is the head, even Christ:
+EPHESIANS 4:16 From whom the whole body fitly joined together and compacted by that which every joint supplieth, according to the effectual working in the measure of every part, maketh increase of the body unto the edifying of itself in love.
+1 PETER 2:1 Wherefore laying aside all malice, and all guile, and hypocrisies, and envies, and all evil speakings,
+1 PETER 2:2 As newborn babes, desire the sincere milk of the word, that ye may grow thereby:
+1 PETER 2:3 If so be that ye have tasted that the Lord is gracious.
+2 PETER 1:4 Whereby are given unto us exceeding great and precious promises: that by these ye might be partakers of the divine nature, having escaped the corruption that is in the world through lust.
+2 PETER 1:5 And beside this, giving all diligence, add to your faith virtue; and to virtue knowledge;
+2 PETER 1:6 And to knowledge temperance; and to temperance patience; and to patience godliness;
+2 PETER 1:7 And to godliness brotherly kindness; and to brotherly kindness charity.
+2 PETER 1:8 For if these things be in you, and abound, they make you that ye shall neither be barren nor unfruitful in the knowledge of our Lord Jesus Christ.
+2 PETER 1:9 But he that lacketh these things is blind, and cannot see afar off, and hath forgotten that he was purged from his old sins.
+2 PETER 3:18 But grow in grace, and in the knowledge of our Lord and Saviour Jesus Christ. To him be glory both now and for ever. Amen.
+4B3 The gifts of the Spirit are to be used by individuals in the church.
+1 CORINTHIANS 12:4 Now there are diversities of gifts, but the same Spirit.
+1 CORINTHIANS 12:5 And there are differences of administrations, but the same Lord.
+1 CORINTHIANS 12:6 And there are diversities of operations, but it is the same God which worketh all in all.
+1 CORINTHIANS 12:7 But the manifestation of the Spirit is given to every man to profit withal.
+1 CORINTHIANS 12:8 For to one is given by the Spirit the word of wisdom; to another the word of knowledge by the same Spirit;
+1 CORINTHIANS 12:9 To another faith by the same Spirit; to another the gifts of healing by the same Spirit;
+1 CORINTHIANS 12:10 To another the working of miracles; to another prophecy; to another discerning of spirits; to another divers kinds of tongues; to another the interpretation of tongues:
+1 CORINTHIANS 12:11 But all these worketh that one and the selfsame Spirit, dividing to every man severally as he will.
+1 CORINTHIANS 14:1 Follow after charity, and desire spiritual gifts, but rather that ye may prophesy.
+1 CORINTHIANS 14:2 For he that speaketh in an unknown tongue speaketh not unto men, but unto God: for no man understandeth him; howbeit in the spirit he speaketh mysteries.
+1 CORINTHIANS 14:3 But he that prophesieth speaketh unto men to edification, and exhortation, and comfort.
+1 CORINTHIANS 14:4 He that speaketh in an unknown tongue edifieth himself; but he that prophesieth edifieth the church.
+1 CORINTHIANS 14:5 I would that ye all spake with tongues but rather that ye prophesied: for greater is he that prophesieth than he that speaketh with tongues, except he interpret, that the church may receive edifying.
+1 CORINTHIANS 14:26 How is it then, brethren? when ye come together, every one of you hath a psalm, hath a doctrine, hath a tongue, hath a revelation, hath an interpretation. Let all things be done unto edifying.
+1 CORINTHIANS 14:27 If any man speak in an unknown tongue, let it be by two, or at the most by three, and that by course; and let one interpret.
+1 CORINTHIANS 14:28 But if there be no interpreter, let him keep silence in the church; and let him speak to himself, and to God..
+1 CORINTHIANS 14:33 For God is not the author of confusion, but of peace, as in all churches of the saints.
+1 CORINTHIANS 14:39 Wherefore, brethren, covet to prophesy, and forbid not to speak with tongues.
+1 CORINTHIANS 14:40 Let all things be done decently and in order.
+CONGRATS, INTERMEDIATE QUIZZERS
+4C After the new birth experience, we continue to grow by exercising Christian disciplines.
+4C1 We are commanded to worship and praise the Lord.
+1 CHRONICLES 15:28 Thus all Israel brought up the ark of the covenant of the LORD with shouting, and with sound of the cornet, and with trumpets, and with cymbals, making a noise with psalteries and harps.
+1 CHRONICLES 16:29 Give unto the LORD the glory due unto his name: bring an offering, and come before him: worship the LORD in the beauty of holiness.
+PSALMS 9:11 Sing praises to the LORD, which dwelleth in Zion: declare among the people his doings.
+PSALMS 22:3 But thou art holy, O thou that inhabitest the praises of Israel.
+PSALMS 33:2 Praise the LORD with harp: sing unto him with the psaltery and an instrument of ten strings.
+PSALMS 47:1 O clap your hands, all ye people; shout unto God with the voice of triumph.
+PSALMS 95:1 O come, let us sing unto the LORD: let us make a joyful noise to the rock of our salvation.
+PSALMS 95:2 Let us come before his presence with thanksgiving, and make a joyful noise unto him with psalms.
+PSALMS 95:6 O come, let us worship and bow down: let us kneel before the LORD our maker.
+PSALMS 100:4 Enter into his gates with thanksgiving, and into his courts with praise: be thankful unto him, and bless his name.
+PSALMS 150:1 Praise ye the LORD. Praise God in his sanctuary: praise him in the firmament of his power.
+PSALMS 150:2 Praise him for his mighty acts: praise him according to his excellent greatness.
+PSALMS 150:3 Praise him with the sound of the trumpet: praise him with the psaltery and harp.
+PSALMS 150:4 Praise him with the timbrel and dance: praise him with stringed instruments and organs.
+PSALMS 150:5 Praise him upon the loud cymbals: praise him upon the high sounding cymbals.
+PSALMS 150:6 Let every thing that hath breath praise the LORD. Praise ye the LORD.
+JOHN 4:23 But the hour cometh, and now is, when the true worshippers shall worship the Father in spirit and in truth: for the Father seeketh such to worship him.
+JOHN 4:24 God is a Spirit: and they that worship him must worship him in spirit and in truth.
+EPHESIANS 5:18 And be not drunk with wine, wherein is excess; but be filled with the Spirit;
+EPHESIANS 5:19 Speaking to yourselves in psalms and hymns and spiritual songs, singing and making melody in your heart to the Lord;
+PHILIPPIANS 2:9 Wherefore God also hath highly exalted him, and given him a name which is above every name:
+PHILIPPIANS 2:10 That at the name of Jesus every knee should bow, of things in heaven, and things in earth, and things under the earth;
+PHILIPPIANS 2:11 And that every tongue should confess that Jesus Christ is Lord, to the glory of God the Father.
+HEBREWS 13:15 By him therefore let us offer the sacrifice of praise to God continually, that is, the fruit of our lips giving thanks to his name.
+1 PETER 2:9 But ye are a chosen generation, a royal priesthood, an holy nation, a peculiar people; that ye should shew forth the praises of him who hath called you out of darkness into his marvellous light;
+4C2 Prayer is a daily essential of our walk with God.
+1 CHRONICLES 16:11 Seek the LORD and his strength, seek his face continually.
+PSALMS 91:15 He shall call upon me, and I will answer him: I will be with him in trouble; I will deliver him, and honour him
+ISAIAH 56:7 Even them will I bring to my holy mountain, and make them joyful in my house of prayer: their burnt offerings and their sacrifices shall be accepted upon mine altar; for mine house shall be called an house of prayer for all people.
+JEREMIAH 29:13 And ye shall seek me, and find me, when ye shall search for me with all your heart.
+MATTHEW 6:5 And when thou prayest, thou shalt not be as the hypocrites are: for they love to pray standing in the synagogues and in the corners of the streets, that they may be seen of men. Verily I say unto you, They have their reward.
+MATTHEW 6:6 But thou, when thou prayest, enter into thy closet, and when thou hast shut thy door, pray to thy Father which is in secret; and thy Father which seeth in secret shall reward thee openly.
+MATTHEW 6:7 But when ye pray, use not vain repetitions, as the heathen do: for they think that they shall be heard for their much speaking.
+MATTHEW 6:8 Be not ye therefore like unto them: for your Father knoweth what things ye have need of, before ye ask him.
+MATTHEW 6:9 After this manner therefore pray ye: Our Father which art in heaven, Hallowed be thy name.
+MATTHEW 6:10 Thy kingdom come, Thy will be done in earth, as it is in heaven.
+MATTHEW 6:11 Give us this day our daily bread.
+MATTHEW 6:12 And forgive us our debts, as we forgive our debtors.
+MATTHEW 6:13 And lead us not into temptation, but deliver us from evil: For thine is the kingdom, and the power, and the glory, for ever. Amen.
+MATTHEW 7:7 Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you:
+MATTHEW 7:8 For every one that asketh receiveth; and he that seeketh findeth; and to him that knocketh it shall be opened.
+MATTHEW 7:9 Or what man is there of you, whom if his son ask bread, will he give him a stone?
+MATTHEW 7:10 Or if he ask a fish, will he give him a serpent?
+MATTHEW 7:11 If ye then, being evil, know how to give good gifts unto your children, how much more shall your Father which is in heaven give good things to them that ask him?
+MATTHEW 18:19 Again I say unto you, That if two of you shall agree on earth as touching any thing that they shall ask, it shall be done for them of my Father which is in heaven.
+MATTHEW 26:41 Watch and pray, that ye enter not into temptation: the spirit indeed is willing, but the flesh is weak.
+LUKE 18:1 And he spake a parable unto them to this end, that men ought always to pray, and not to faint;
+JOHN 16:24 Hitherto have ye asked nothing in my name: ask, and ye shall receive, that your joy may be full.
+EPHESIANS 6:18 Praying always with all prayer and supplication in the Spirit, and watching thereunto with all perseverance and supplication for all saints;
+PHILIPPIANS 4:6 Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.
+1 THESSALONIANS 5:17 Pray without ceasing.
+1 TIMOTHY 2:8 I will therefore that men pray every where, lifting up holy hands, without wrath and doubting.
+JAMES 5:13 Is any among you afflicted? let him pray. Is any merry? let him sing psalms.
+JAMES 5:14 Is any sick among you? let him call for the elders of the church; and let them pray over him, anointing him with oil in the name of the Lord:
+JAMES 5:15 And the prayer of faith shall save the sick, and the Lord shall raise him up; and if he have committed sins, they shall be forgiven him.
+JAMES 5:16 Confess your faults one to another, and pray one for another, that ye may be healed. The effectual fervent prayer of a righteous man availeth much.
+JAMES 5:17 Elias was a man subject to like passions as we are, and he prayed earnestly that it might not rain: and it rained not on the earth by the space of three years and six months.
+JAMES 5:18 And he prayed again, and the heaven gave rain, and the earth brought forth her fruit.
+4C3 Fasting is an important practice in our Christian life.
+JOEL 1:14 Sanctify ye a fast, call a solemn assembly, gather the elders and all the inhabitants of the land into the house of the LORD your God, and cry unto the LORD,
+MATTHEW 6:16 Moreover when ye fast, be not, as the hypocrites, of a sad countenance: for they disfigure their faces, that they may appear unto men to fast. Verily I say unto you, They have their reward.
+MATTHEW 6:17 But thou, when thou fastest, anoint thine head, and wash thy face;
+MATTHEW 6:18 That thou appear not unto men to fast, but unto thy Father which is in secret: and thy Father, which seeth in secret, shall reward thee openly.
+MATTHEW 17:21 Howbeit this kind goeth not out but by prayer and fasting.
+ACTS 13:2 As they ministered to the Lord, and fasted, the Holy Ghost said, Separate me Barnabas and Saul for the work whereunto I have called them.
+ACTS 14:23 And when they had ordained them elders in every church, and had prayed with fasting, they commended them to the Lord, on whom they believed.
+4C4 Our apparel and adornment should glorify God and reflect Christ in us.
+DEUTERONOMY 22:5 The woman shall not wear that which pertaineth unto a man, neither shall a man put on a woman's garment: for all that do so are abomination unto the LORD thy God.
+1 CORINTHIANS 11:3 But I would have you know, that the head of every man is Christ; and the head of the woman is the man; and the head of Christ is God.
+1 CORINTHIANS 11:4 Every man praying or prophesying, having his head covered, dishonoureth his head.
+1 CORINTHIANS 11:5 But every woman that prayeth or prophesieth with her head uncovered dishonoureth her head: for that is even all one as if she were shaven.
+1 CORINTHIANS 11:6 For if the woman be not covered, let her also be shorn: but if it be a shame for a woman to be shorn or shaven, let her be covered.
+1 CORINTHIANS 11:7 For a man indeed ought not to cover his head, forasmuch as he is the image and glory of God: but the woman is the glory of the man.
+1 CORINTHIANS 11:8 For the man is not of the woman: but the woman of the man.
+1 CORINTHIANS 11:9 Neither was the man created for the woman; but the woman for the man.
+1 CORINTHIANS 11:10 For this cause ought the woman to have power on her head because of the angels.
+1 CORINTHIANS 11:13 Judge in yourselves: is it comely that a woman pray unto God uncovered?
+1 CORINTHIANS 11:14 Doth not even nature itself teach you, that, if a man have long hair, it is a shame unto him?
+1 CORINTHIANS 11:15 But if a woman have long hair, it is a glory to her: for her hair is given her for a covering.
+1 CORINTHIANS 11:16 But if any man seem to be contentious, we have no such custom, neither the churches of God.
+1 TIMOTHY 2:8 I will therefore that men pray every where, lifting up holy hands, without wrath and doubting.
+1 TIMOTHY 2:9 In like manner also, that women adorn themselves in modest apparel, with shamefacedness and sobriety; not with broided hair, or gold, or pearls, or costly array;
+1 TIMOTHY 2:10 But (which becometh women professing godliness) with good works.
+1 PETER 3:3 Whose adorning let it not be that outward adorning of plaiting the hair, and of wearing of gold, or of putting on of apparel;
+1 PETER 3:4 But let it be the hidden man of the heart, in that which is not corruptible, even the ornament of a meek and quiet spirit, which is in the sight of God of great price.
+4D We are to live in community with other believers.
+4D1 Regular church attendance is necessary and spiritually enriching.
+PSALMS 23:6 Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.
+PSALMS 27:4 One thing have I desired of the LORD, that will I seek after; that I may dwell in the house of the LORD all the days of my life, to behold the beauty of the LORD, and to enquire in his temple.
+PSALMS 84:4 Blessed are they that dwell in thy house: they will be still praising thee. Selah.
+PSALMS 84:10 For a day in thy courts is better than a thousand. I had rather be a doorkeeper in the house of my God, than to dwell in the tents of wickedness.
+PSALMS 122:1 I was glad when they said unto me, Let us go into the house of the LORD.
+LUKE 4:16 And he came to Nazareth, where he had been brought up: and, as his custom was, he went into the synagogue on the sabbath day, and stood up for to read.
+1 CORINTHIANS 4:2 Moreover it is required in stewards, that a man be found faithful.
+HEBREWS 10:24 And let us consider one another to provoke unto love and to good works:
+HEBREWS 10:25 Not forsaking the assembling of ourselves together, as the manner of some is; but exhorting one another: and so much the more, as ye see the day approaching.
+4D2 Honor and submission are to be given to God-ordained authority.
+1 CORINTHIANS 9:9 For it is written in the law of Moses, Thou shalt not follow a multitude to do evil; neither shalt thou speak in a cause to decline after many to wrest judgment: Doth God take care for oxen?
+1 CORINTHIANS 9:13 Do ye not know that they which minister about holy things live of the things of the temple? and they which wait at the altar are partakers with the altar?
+1 CORINTHIANS 9:14 Even so hath the Lord ordained that they which preach the gospel should live of the gospel.
+1 CORINTHIANS 12:28 And God hath set some in the church, first apostles, secondarily prophets, thirdly teachers, after that miracles, then gifts of healings, helps, governments, diversities of tongues.
+EPHESIANS 2:19 Now therefore ye are no more strangers and foreigners, but fellowcitizens with the saints, and of the household of God;
+EPHESIANS 2:20 And are built upon the foundation of the apostles and prophets, Jesus Christ himself being the chief corner stone;
+EPHESIANS 2:21 In whom all the building fitly framed together groweth unto an holy temple in the Lord:
+EPHESIANS 2:22 In whom ye also are builded together for an habitation of God through the Spirit.
+EPHESIANS 5:21 Submitting yourselves one to another in the fear of God.
+1 THESSALONIANS 5:12 And we beseech you, brethren, to know them which labour among you, and are over you in the Lord, and admonish you;
+1 THESSALONIANS 5:13 And to esteem them very highly in love for their work's sake. And be at peace among yourselves.
+1 TIMOTHY 5:17 Let the elders that rule well be counted worthy of double honour, especially they who labour in the word and doctrine.
+HEBREWS 13:7 Remember them which have the rule over you, who have spoken unto you the word of God: whose faith follow, considering the end of their conversation.
+HEBREWS 13:17 Obey them that have the rule over you, and submit yourselves: for they watch for your souls, as they that must give account, that they may do it with joy, and not with grief: for that is unprofitable for you.
+4D3 Sharing God's goodness in your own life will lead others closer to the Lord.
+EXODUS 4:12 Now therefore go, and I will be with thy mouth, and teach thee what thou shalt say.
+PSALMS 66:16 Come and hear, all ye that fear God, and I will declare what he hath done for my soul.
+JEREMIAH 20:9 Then I said, I will not make mention of him, nor speak any more in his name. But his word was in mine heart as a burning fire shut up in my bones, and I was weary with forbearing, and I could not stay.
+LUKE 12:12 For the Holy Ghost shall teach you in the same hour what ye ought to say.
+JOHN 13:35 By this shall all men know that ye are my disciples, if ye have love one to another.
+ACTS 1:8 But ye shall receive power, after that the Holy Ghost is come upon you: and ye shall be witnesses unto me both in Jerusalem, and in all Judaea, and in Samaria, and unto the uttermost part of the earth.
+ACTS 4:20 For we cannot but speak the things which we have seen and heard.
+1 CORINTHIANS 2:13 Which things also we speak, not in the words which man's wisdom teacheth, but which the Holy Ghost teacheth; comparing spiritual things with spiritual.
+2 TIMOTHY 1:8 Be not thou therefore ashamed of the testimony of our Lord, nor of me his prisoner: but be thou partaker of the afflictions of the gospel according to the power of God;
+1 PETER 3:15 But sanctify the Lord God in your hearts: and be ready always to give an answer to every man that asketh you a reason of the hope that is in you with meekness and fear:`;
+
+    // --- PARSER ---
+    function parseData(text) {
+        const lines = text.split('\n');
+        const verses = [];
+        const seenRefs = new Set();
+        let currentSection = null;
+        let isExperienced = false;
+        
+        const sectionRegex = /^(\d+[A-Z]+\d*)/;
+        const verseRegex = /^([1-9] [A-Z]+|[A-Z]+) \d+:\d+/;
+
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+
+            if (line.includes("CONGRATS, INTERMEDIATE QUIZZERS")) {
+                isExperienced = true;
+                continue;
+            }
+
+            // Check for Section Header
+            const sectionMatch = line.match(sectionRegex);
+            if (sectionMatch && !line.match(verseRegex)) {
+                currentSection = sectionMatch[1];
+                continue; 
+            }
+
+            // Check for Verse
+            const verseMatch = line.match(verseRegex);
+            if (verseMatch) {
+                const firstSpaceIndex = line.indexOf(' ', line.indexOf(':'));
+                if (firstSpaceIndex > -1) {
+                    const ref = line.substring(0, firstSpaceIndex);
+                    
+                    // DEDUPLICATION CHECK
+                    if (seenRefs.has(ref)) {
+                        continue;
+                    }
+                    seenRefs.add(ref);
+
+                    const textContent = line.substring(firstSpaceIndex + 1);
+                    
+                    verses.push({
+                        section: currentSection,
+                        division: isExperienced ? 'Experienced' : 'Intermediate',
+                        ref: ref,
+                        text: textContent,
+                        id: verses.length
+                    });
+                }
+            }
+        }
+        return verses;
+    }
+
+    const allVerses = parseData(rawData);
+
+    // --- STATE MANAGEMENT ---
+    const state = {
+        division: 'Intermediate',
+        selectedSections: new Set(),
+        limit: 100,
+        isMixed: true, 
+        queue: [],
+        currentIndex: 0,
+        missed: [],
+        showingFront: true,
+        sessionCorrect: 0,
+        sessionIncorrect: 0,
+        timerInterval: null,
+        secondsElapsed: 0
+    };
+
+    // --- UI ELEMENTS ---
+    const btnDivision = document.getElementById('btn-division');
+    const sectionGrid = document.getElementById('section-grid');
+    const btnReset = document.getElementById('btn-reset');
+    const limitSlider = document.getElementById('limit-slider');
+    const limitDisplay = document.getElementById('limit-display');
+    const btnMixed = document.getElementById('btn-mixed');
+    const startBtn = document.getElementById('start-btn');
+    const flashcard = document.getElementById('flashcard');
+    const fcLabel = document.getElementById('fc-label');
+    const fcMainText = document.getElementById('fc-main-text');
+    const fcSubText = document.getElementById('fc-sub-text');
+    const btnCorrect = document.getElementById('btn-correct');
+    const btnIncorrect = document.getElementById('btn-incorrect');
+    const btnQuit = document.getElementById('btn-quit');
+    const btnRestart = document.getElementById('btn-restart');
+    const progressBar = document.getElementById('quiz-progress');
+    const headerSubtitle = document.getElementById('header-subtitle');
+    const missedList = document.getElementById('missed-list');
+    const statTotal = document.getElementById('stat-total');
+    const statMissed = document.getElementById('stat-missed-count');
+    
+    // Live Stats
+    const statLiveCorrect = document.getElementById('stat-live-correct');
+    const statLiveIncorrect = document.getElementById('stat-live-incorrect');
+    const statLiveLeft = document.getElementById('stat-live-left');
+
+    // --- FUNCTIONS ---
+
+    function getAvailableSections() {
+        const relevantVerses = allVerses.filter(v => 
+            state.division === 'Experienced' ? true : v.division === 'Intermediate'
+        );
+        const sections = [...new Set(relevantVerses.map(v => v.section))];
+        return sections;
+    }
+
+    function renderSectionGrid() {
+        sectionGrid.innerHTML = '';
+        const sections = getAvailableSections();
+        
+        sections.forEach(sec => {
+            const chip = document.createElement('div');
+            chip.className = 'section-chip';
+            if (state.selectedSections.has(sec)) {
+                chip.classList.add('selected');
+            }
+            chip.innerText = sec;
+            chip.onclick = () => toggleSection(sec, chip);
+            sectionGrid.appendChild(chip);
+        });
+        updateSliderMax();
+    }
+
+    function toggleSection(sec, element) {
+        if (state.selectedSections.has(sec)) {
+            state.selectedSections.delete(sec);
+            element.classList.remove('selected');
+        } else {
+            state.selectedSections.add(sec);
+            element.classList.add('selected');
+        }
+        updateSliderMax();
+    }
+
+    function getEffectiveVerseCount() {
+        const sections = getAvailableSections();
+        const activeSections = state.selectedSections.size > 0 
+            ? state.selectedSections 
+            : new Set(sections); 
+
+        return allVerses.filter(v => activeSections.has(v.section)).length;
+    }
+
+    function updateSliderMax() {
+        const count = getEffectiveVerseCount();
+        limitSlider.max = count > 0 ? count : 1;
+        limitSlider.value = limitSlider.max;
+        limitDisplay.innerText = limitSlider.value;
+    }
+
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        // Reset scroll
+        if(document.getElementById(id)) document.getElementById(id).scrollTop = 0;
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function updateQuizStats() {
+        statLiveCorrect.innerText = state.sessionCorrect;
+        statLiveIncorrect.innerText = state.sessionIncorrect;
+        // Remaining doesn't count repeats added to end, just items left in index
+        // Or technically queue.length - currentIndex
+        const left = state.queue.length - state.currentIndex;
+        statLiveLeft.innerText = left > 0 ? left : 0;
+    }
+
+    function startTimer() {
+        clearInterval(state.timerInterval);
+        const timerDisplay = document.getElementById('stat-live-time');
+        timerDisplay.innerText = "00:00";
+        state.secondsElapsed = 0;
+        
+        state.timerInterval = setInterval(() => {
+            state.secondsElapsed++;
+            timerDisplay.innerText = formatTime(state.secondsElapsed);
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(state.timerInterval);
+    }
+
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function startQuiz() {
+        const sections = getAvailableSections();
+        let activeSections = state.selectedSections;
+
+        if (activeSections.size === 0) {
+            activeSections = new Set(sections);
+        }
+
+        let pool = allVerses.filter(v => activeSections.has(v.section));
+        
+        if (pool.length === 0) {
+            alert("No verses found for this selection.");
+            return;
+        }
+
+        const limit = parseInt(limitSlider.value);
+        
+        if (state.isMixed) {
+            shuffleArray(pool);
+        }
+
+        state.queue = pool.slice(0, limit);
+        state.currentIndex = 0;
+        state.missed = [];
+        state.showingFront = true;
+        state.sessionCorrect = 0;
+        state.sessionIncorrect = 0;
+
+        updateCard();
+        updateQuizStats();
+        startTimer();
+        
+        headerSubtitle.innerText = `${state.division} - Study Mode`;
+        headerSubtitle.classList.remove('hidden');
+        switchScreen('quiz-screen');
+    }
+
+    function updateCard() {
+        if (state.currentIndex >= state.queue.length) {
+            endQuiz();
+            return;
+        }
+
+        const verse = state.queue[state.currentIndex];
+        state.showingFront = true;
+        
+        fcLabel.innerText = "Reference";
+        fcMainText.innerText = verse.ref;
+        fcSubText.innerText = "Tap to reveal text";
+        fcSubText.style.visibility = 'visible';
+        
+        const progress = (state.currentIndex / state.queue.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        
+        updateQuizStats();
+    }
+
+    function flipCard() {
+        const verse = state.queue[state.currentIndex];
+        state.showingFront = !state.showingFront;
+
+        if (!state.showingFront) {
+            fcLabel.innerText = `${verse.ref} (${verse.section})`;
+            fcMainText.innerText = verse.text;
+            fcSubText.style.visibility = 'hidden';
+        } else {
+            fcLabel.innerText = "Reference";
+            fcMainText.innerText = verse.ref;
+            fcSubText.style.visibility = 'visible';
+        }
+    }
+
+    function handleResult(correct) {
+        if (correct) {
+            state.sessionCorrect++;
+        } else {
+            state.sessionIncorrect++;
+            const currentVerse = state.queue[state.currentIndex];
+            state.queue.push(currentVerse);
+            
+            if (!state.missed.some(v => v.id === currentVerse.id)) {
+                state.missed.push(currentVerse);
+            }
+        }
+        state.currentIndex++;
+        updateCard();
+    }
+
+    function endQuiz() {
+        stopTimer();
+        statTotal.innerText = state.sessionCorrect + state.sessionIncorrect;
+        statMissed.innerText = state.missed.length;
+        document.getElementById('stat-final-time').innerText = formatTime(state.secondsElapsed);
+        
+        missedList.innerHTML = '';
+        state.missed.forEach(v => {
+            const li = document.createElement('li');
+            li.className = 'missed-item';
+            
+            // Allow tap to expand
+            li.onclick = () => {
+                li.classList.toggle('expanded');
+            };
+
+            li.innerHTML = `
+                <div class="missed-header">
+                    <span class="missed-ref">${v.ref}</span>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="missed-text">${v.text}</div>
+            `;
+            missedList.appendChild(li);
+        });
+
+        if (state.missed.length === 0) {
+            missedList.innerHTML = '<li class="missed-item" style="text-align:center; color: var(--accent-green); font-weight:bold; cursor:default;">Perfect Score!</li>';
+        }
+
+        switchScreen('stats-screen');
+    }
+
+    // --- EVENT LISTENERS ---
+
+    // New Division Toggle Logic
+    btnDivision.addEventListener('click', () => {
+        if (state.division === 'Intermediate') {
+            state.division = 'Experienced';
+        } else {
+            state.division = 'Intermediate';
+        }
+        
+        btnDivision.innerText = state.division;
+        
+        // Clear selections on switch
+        state.selectedSections.clear();
+        renderSectionGrid();
+    });
+
+    btnReset.addEventListener('click', () => {
+        state.selectedSections.clear();
+        renderSectionGrid();
+    });
+
+    limitSlider.addEventListener('input', (e) => {
+        limitDisplay.innerText = e.target.value;
+    });
+
+    // Toggle Mixed/Ordered
+    btnMixed.addEventListener('click', () => {
+        state.isMixed = !state.isMixed;
+        if (state.isMixed) {
+            btnMixed.classList.add('active');
+            btnMixed.innerText = "Mixed Order";
+        } else {
+            btnMixed.classList.remove('active');
+            btnMixed.innerText = "Sequential Order";
+        }
+    });
+
+    startBtn.addEventListener('click', startQuiz);
+    
+    flashcard.addEventListener('click', flipCard);
+    
+    btnCorrect.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleResult(true);
+    });
+    
+    btnIncorrect.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleResult(false);
+    });
+
+    btnQuit.addEventListener('click', () => {
+        // Stop timer if user quits early to ensure stats screen gets final time
+        stopTimer();
+        endQuiz();
+    });
+    
+    btnRestart.addEventListener('click', () => {
+        switchScreen('setup-screen');
+        headerSubtitle.classList.add('hidden');
+    });
+
+    // --- INITIALIZATION ---
+    renderSectionGrid();
+
+</script>
+</body>
+</html>
